@@ -1,0 +1,27 @@
+{
+  "name": "zssn-api",
+  "version": "1.0.0",
+  "description": "Zombie Survival Social Network",
+  "scripts": {
+    "prebuild": "rimraf dist",
+    "build": "tsc",
+    "start:dev": "nodemon -L src/index.ts",
+    "start:prod": "yarn build && node dist/index.js"
+  },
+  "author": "Vitor Bichara",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/express": "^4.17.2",
+    "@types/mongoose": "^5.5.32",
+    "@types/node": "^12.12.14",
+    "nodemon": "^2.0.1",
+    "ts-node": "^8.5.4",
+    "typescript": "^3.7.3"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "mongoose": "^5.7.14",
+    "reflect-metadata": "^0.1.13",
+    "rimraf": "^3.0.0"
+  }
+}
