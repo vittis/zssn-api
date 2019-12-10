@@ -7,8 +7,7 @@ services:
       dockerfile: Dockerfile
     container_name: zssn-api
     volumes:
-      - ./src:/usr/app/src
-      - ./nodemon.json:/usr/app/nodemon.json
+      - .:/usr/app
     expose:
       - "8080"
     ports:
