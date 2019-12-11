@@ -11,7 +11,13 @@ export class DbConnection {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public static async connect(connStr: string): Promise<any> {
     return mongoose
-      .connect(connStr, { useNewUrlParser: true, useFindAndModify: false })
+      .connect(connStr, {
+        user: 'root',
+        pass: 'secret',
+        useNewUrlParser: true,
+        useFindAndModify: false,
+        authSource: 'admin',
+      })
       .then(() => {
         console.log(`Successfully connected to ${connStr}`);
       })

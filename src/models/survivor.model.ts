@@ -1,15 +1,18 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
-export interface Survivor extends Document {
+export interface ISurvivor extends Document {
   name: string;
   age: number;
   gender: string;
 }
 
-const SurvivorSchema: Schema = new Schema({
-  name: { type: Schema.Types.String, required: true },
-  age: { type: Schema.Types.Number, required: true },
-  gender: { type: Schema.Types.String, required: true, max: 1 }, // M or F
-});
+const SurvivorSchema: Schema = new Schema(
+  {
+    name: { type: Schema.Types.String, required: true },
+    age: { type: Schema.Types.Number, required: true },
+    gender: { type: Schema.Types.String, required: true, maxlength: 1 }, // M or F
+  },
+  { timestamps: true },
+);
 
-export default mongoose.model<Survivor>('Survivor', SurvivorSchema);
+export default mongoose.model<ISurvivor>('Survivor', SurvivorSchema);

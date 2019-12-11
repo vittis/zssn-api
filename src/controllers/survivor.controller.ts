@@ -9,8 +9,13 @@ import {
   httpPut,
 } from 'inversify-express-utils';
 import { SurvivorService } from '../services/survivor.service';
-import { JsonResult } from 'inversify-express-utils/dts/results';
+import {
+  JsonResult,
+  BadRequestResult,
+  BadRequestErrorMessageResult as BadRequest,
+} from 'inversify-express-utils/dts/results';
 import { TYPES } from '../config/container';
+import { ISurvivor } from '../models/survivor.model';
 
 @controller('/survivors')
 export class SurvivorController extends BaseHttpController {
@@ -21,8 +26,12 @@ export class SurvivorController extends BaseHttpController {
   }
 
   @httpGet('/')
-  public async index(): Promise<JsonResult> {
-    return this.json({ method: 'index' }, 200);
+  public async index(): Promise<ISurvivor[] | BadRequest> {
+    try {
+      return this.survivorService.findAll();
+    } catch (err) {
+      return this.badRequest(err);
+    }
   }
 
   @httpGet('/:id')
@@ -31,8 +40,15 @@ export class SurvivorController extends BaseHttpController {
   }
 
   @httpPost('/')
-  public async store(req: Request, res: Response): Promise<JsonResult> {
-    return this.json({ method: 'store' }, 201);
+  public async store(
+    req: Request,
+    res: Response,
+  ): Promise<ISurvivor | BadRequest> {
+    try {
+      return await this.survivorService.create(req.body);
+    } catch (err) {
+      return this.badRequest(err);
+    }
   }
 
   @httpPut('/:id')
