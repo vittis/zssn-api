@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response } from 'express';
 import { inject } from 'inversify';
 import {
   BaseHttpController,
@@ -9,24 +9,26 @@ import {
   httpPut,
 } from 'inversify-express-utils';
 import { SurvivorService } from '../services/survivor.service';
+import { BlueprintService } from '../services/blueprint.service';
 import {
   JsonResult,
-  BadRequestResult,
   BadRequestErrorMessageResult as BadRequest,
 } from 'inversify-express-utils/dts/results';
 import { TYPES } from '../config/container';
-import { ISurvivor } from '../models/survivor.model';
+import { Survivor } from '../models/survivor.model';
 
 @controller('/survivors')
 export class SurvivorController extends BaseHttpController {
   constructor(
     @inject(TYPES.SurvivorService) private survivorService: SurvivorService,
+    @inject(TYPES.BlueprintService)
+    private blueprintService: BlueprintService,
   ) {
     super();
   }
 
   @httpGet('/')
-  public async index(): Promise<ISurvivor[] | BadRequest> {
+  public async index(): Promise<Survivor[] | BadRequest> {
     try {
       return this.survivorService.findAll();
     } catch (err) {
@@ -43,9 +45,10 @@ export class SurvivorController extends BaseHttpController {
   public async store(
     req: Request,
     res: Response,
-  ): Promise<ISurvivor | BadRequest> {
+  ): Promise<Survivor | BadRequest | void> {
     try {
-      return await this.survivorService.create(req.body);
+      const items = await this.blueprintService.findAll();
+      return await this.survivorService.create(req.body, items);
     } catch (err) {
       return this.badRequest(err);
     }

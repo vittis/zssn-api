@@ -9,9 +9,9 @@ services:
     volumes:
       - .:/usr/app
     expose:
-      - "8080"
+      - "3030"
     ports:
-      - "8080:8080"
+      - "3030:3030"
       - "9229:9229"
     command: yarn start:dev
     depends_on:
@@ -19,10 +19,10 @@ services:
   mongo-express:
     image: mongo-express
     ports:
-      - 8081:8081
+      - 5555:8081
     environment:
-      ME_CONFIG_BASICAUTH_USERNAME: vittis
-      ME_CONFIG_BASICAUTH_PASSWORD: secret
+      #ME_CONFIG_BASICAUTH_USERNAME: vittis
+      #ME_CONFIG_BASICAUTH_PASSWORD: secret
       ME_CONFIG_MONGODB_PORT: 27017
       ME_CONFIG_MONGODB_ADMINUSERNAME: root
       ME_CONFIG_MONGODB_ADMINPASSWORD: secret

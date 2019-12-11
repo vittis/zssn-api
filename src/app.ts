@@ -4,9 +4,11 @@ import { ContainerConfigLoader } from './config/container';
 import * as bodyParser from 'body-parser';
 import { InversifyExpressServer } from 'inversify-express-utils';
 
+import './controllers/blueprint.controller';
+import './controllers/item.controller';
 import './controllers/survivor.controller';
 
-const PORT = 8080;
+const PORT = 3030;
 
 // load everything needed to the Container
 const container = ContainerConfigLoader.Load();
