@@ -41,14 +41,14 @@ export class SurvivorController extends BaseHttpController {
     return this.json({ method: 'show' }, 200);
   }
 
-  @httpPost('/')
+  @httpPost('/', TYPES.SchemaValidator)
   public async store(
     req: Request,
     res: Response,
-  ): Promise<Survivor | BadRequest | void> {
+  ): Promise<Survivor | BadRequest> {
     try {
-      const items = await this.blueprintService.findAll();
-      return await this.survivorService.create(req.body, items);
+      const blueprints = await this.blueprintService.findAll();
+      return await this.survivorService.create(req.body, blueprints);
     } catch (err) {
       return this.badRequest(err);
     }

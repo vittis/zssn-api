@@ -1,8 +1,8 @@
-import { injectable, inject } from 'inversify';
+import { injectable } from 'inversify';
 import SurvivorSchema, { Survivor } from '../models/survivor.model';
 import ItemSchema from '../models/item.model';
-import { TYPES } from '../config/container';
 import { Blueprint } from '../models/blueprint.model';
+import { SurvivorCreateDTO } from '../Validator/survivor/survivorCreate';
 
 @injectable()
 export class SurvivorService {
@@ -11,33 +11,32 @@ export class SurvivorService {
   }
 
   public async create(
-    survivorData: Survivor,
+    survivorData: SurvivorCreateDTO,
     items: Blueprint[],
   ): Promise<Survivor> {
-    // eslint-disable-next-line
-    try {
-      const survivor = new SurvivorSchema({
-        ...survivorData,
-        loc: {
-          type: 'Point',
-          coordinates: [-73.97, 40.77],
-        },
-      });
+    const { name, gender, age, lon, lat } = survivorData;
 
-      const itemId = items[0].id;
+    const survivor = new SurvivorSchema({
+      name,
+      gender,
+      age,
+      loc: {
+        type: 'Point',
+        coordinates: [lon, lat],
+      },
+    });
 
-      const item = new ItemSchema({
-        quantity: 1,
-        item: itemId,
-        owner: survivor.id,
-      });
+    const itemId = items[0].id;
 
-      await item.save();
+    const item = new ItemSchema({
+      quantity: 1,
+      item: itemId,
+      owner: survivor.id,
+    });
 
-      return await survivor.save();
-    } catch (err) {
-      throw err;
-    }
+    await item.save();
+
+    return await survivor.save();
   }
 
   public async findById(id: number) {

@@ -2,21 +2,19 @@ import { Container } from 'inversify';
 import { SurvivorService } from '../services/survivor.service';
 import { BlueprintService } from '../services/blueprint.service';
 import { ItemService } from '../services/item.service';
-import { ValidationMiddleware } from '../middlewares/validator';
+import { SchemaValidator } from '../middlewares/schemaValidator';
 
 export const TYPES = {
   SurvivorService: Symbol.for('SurvivorService'),
   BlueprintService: Symbol.for('BlueprintService'),
   ItemService: Symbol.for('ItemService'),
-  ValidationMiddleware: Symbol.for('ValidationMiddleware'),
+  SchemaValidator: Symbol.for('SchemaValidator'),
 };
 
 export class ContainerConfigLoader {
   public static Load(): Container {
     const container = new Container();
-    container
-      .bind<ValidationMiddleware>(TYPES.ValidationMiddleware)
-      .to(ValidationMiddleware);
+    container.bind<SchemaValidator>(TYPES.SchemaValidator).to(SchemaValidator);
 
     container.bind<SurvivorService>(TYPES.SurvivorService).to(SurvivorService);
     container.bind<ItemService>(TYPES.ItemService).to(ItemService);

@@ -1,10 +1,10 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
-// eslint-disable-next-line @typescript-eslint/interface-name-prefix
 export interface Survivor extends Document {
   name: string;
   age: number;
   gender: string;
+  loc: { coordinats: [number] };
 }
 
 const SurvivorSchema: Schema = new Schema(
