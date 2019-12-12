@@ -17,7 +17,7 @@ export class SchemaValidator extends BaseMiddleware {
     const route = req.route.path;
     const method = req.method.toLowerCase();
 
-    const { schema } = _.find(Schemas, { path: route, method: method }) || {};
+    const { schema } = Schemas.find(o => o.path === route && o.method === method) || {};
 
     if (schema) {
       // Validate req.body using the schema and validation options

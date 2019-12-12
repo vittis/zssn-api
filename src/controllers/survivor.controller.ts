@@ -69,4 +69,13 @@ export class SurvivorController extends BaseHttpController {
       return this.badRequest(err);
     }
   }
+
+  @httpPost('/:id/report-infection', TYPES.SchemaValidator)
+  public async reportInfection(req: Request): Promise<Survivor | BadRequest> {
+    try {
+      return await this.survivorService.reportInfection(req.params.id, req.body);
+    } catch (err) {
+      return this.badRequest(err);
+    }
+  }
 }

@@ -4,8 +4,7 @@ export interface SurvivorUpdateDTO {
   name?: string;
   gender?: string;
   age?: number;
-  lon?: number;
-  lat?: number;
+  coordinates?: [number, number];
 }
 
 const survivorUpdateSchema = Joi.object({
@@ -19,12 +18,11 @@ const survivorUpdateSchema = Joi.object({
   age: Joi.number()
     .integer()
     .positive(),
-  lon: Joi.number()
-    .greater(-181)
-    .less(181),
-  lat: Joi.number()
-    .greater(-91)
-    .less(91),
+  coordinates: Joi.array().items(
+    Joi.number()
+      .greater(-181)
+      .less(181),
+  ),
 });
 
 export default {

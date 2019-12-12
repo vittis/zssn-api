@@ -4,7 +4,9 @@ export interface Survivor extends Document {
   name: string;
   age: number;
   gender: string;
-  loc: { coordinats: [number] };
+  loc: { coordinats: [number, number] };
+  infected: boolean;
+  reportedBy: [string];
 }
 
 const SurvivorSchema: Schema = new Schema(
@@ -16,6 +18,8 @@ const SurvivorSchema: Schema = new Schema(
       type: { type: String },
       coordinates: [Number],
     },
+    infected: { type: Schema.Types.Boolean, default: false },
+    reportedBy: { type: Schema.Types.Array, default: [] },
   },
   { timestamps: true },
 );
