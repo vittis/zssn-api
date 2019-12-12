@@ -11,8 +11,9 @@ import {
 import {
   JsonResult,
   BadRequestErrorMessageResult as BadRequest,
+  OkResult,
 } from 'inversify-express-utils/dts/results';
-import { TYPES } from '../config/container';
+import { TYPES } from '../ioc/container';
 import { BlueprintService } from '../services/blueprint.service';
 import { Blueprint } from '../models/blueprint.model';
 
@@ -34,7 +35,16 @@ export class BlueprintController extends BaseHttpController {
     }
   }
 
-  @httpPost('/')
+  @httpGet('/:id')
+  public async show(req: Request): Promise<Blueprint | BadRequest> {
+    try {
+      return await this.blueprintService.findById(req.params.id);
+    } catch (err) {
+      return this.badRequest(err);
+    }
+  }
+
+  @httpPost('/', TYPES.SchemaValidator)
   public async store(req: Request): Promise<Blueprint | BadRequest> {
     try {
       return await this.blueprintService.create(req.body);
@@ -44,7 +54,12 @@ export class BlueprintController extends BaseHttpController {
   }
 
   @httpDelete('/:id')
-  public async destroy(req: Request, res: Response): Promise<JsonResult> {
-    return this.json({ method: 'destroy' }, 200);
+  public async destroy(req: Request): Promise<OkResult | BadRequest> {
+    try {
+      await this.blueprintService.delete(req.params.id);
+      return this.ok();
+    } catch (err) {
+      return this.badRequest(err);
+    }
   }
 }

@@ -9,7 +9,7 @@ export interface Survivor extends Document {
 
 const SurvivorSchema: Schema = new Schema(
   {
-    name: { type: Schema.Types.String, required: true },
+    name: { type: Schema.Types.String, required: true, unique: true },
     age: { type: Schema.Types.Number, required: true },
     gender: { type: Schema.Types.String, required: true, maxlength: 1 }, // M or F
     loc: {

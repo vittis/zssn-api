@@ -6,58 +6,67 @@ import {
   httpDelete,
   httpGet,
   httpPost,
-  httpPut,
+  httpPatch,
 } from 'inversify-express-utils';
 import { SurvivorService } from '../services/survivor.service';
-import { BlueprintService } from '../services/blueprint.service';
 import {
   JsonResult,
   BadRequestErrorMessageResult as BadRequest,
+  OkResult,
 } from 'inversify-express-utils/dts/results';
-import { TYPES } from '../config/container';
+import { TYPES } from '../ioc/container';
 import { Survivor } from '../models/survivor.model';
 
 @controller('/survivors')
 export class SurvivorController extends BaseHttpController {
-  constructor(
-    @inject(TYPES.SurvivorService) private survivorService: SurvivorService,
-    @inject(TYPES.BlueprintService)
-    private blueprintService: BlueprintService,
-  ) {
+  constructor(@inject(TYPES.SurvivorService) private survivorService: SurvivorService) {
     super();
   }
 
   @httpGet('/')
   public async index(): Promise<Survivor[] | BadRequest> {
     try {
-      return this.survivorService.findAll();
+      return await this.survivorService.findAll();
     } catch (err) {
       return this.badRequest(err);
     }
   }
 
   @httpGet('/:id')
-  public async show(req: Request, res: Response): Promise<JsonResult> {
-    return this.json({ method: 'show' }, 200);
-  }
-
-  @httpPost('/', TYPES.SchemaValidator)
-  public async store(req: Request): Promise<Survivor | BadRequest> {
+  public async show(req: Request): Promise<Survivor | BadRequest> {
     try {
-      const blueprints = await this.blueprintService.findAll();
-      return await this.survivorService.create(req.body, blueprints);
+      return await this.survivorService.findById(req.params.id);
     } catch (err) {
       return this.badRequest(err);
     }
   }
 
-  @httpPut('/:id')
-  public async update(req: Request, res: Response): Promise<JsonResult> {
-    return this.json({ method: 'update' }, 201);
+  @httpPost('/', TYPES.SchemaValidator)
+  public async store(req: Request): Promise<Survivor | BadRequest> {
+    try {
+      return await this.survivorService.create(req.body);
+    } catch (err) {
+      return this.badRequest(err);
+    }
+  }
+
+  @httpPatch('/:id', TYPES.SchemaValidator)
+  public async update(req: Request): Promise<Survivor | BadRequest> {
+    try {
+      const survivor = await this.survivorService.update(req.params.id, req.body);
+      return survivor;
+    } catch (err) {
+      return this.badRequest(err);
+    }
   }
 
   @httpDelete('/:id')
-  public async destroy(req: Request, res: Response): Promise<JsonResult> {
-    return this.json({ method: 'destroy' }, 200);
+  public async destroy(req: Request): Promise<OkResult | BadRequest> {
+    try {
+      await this.survivorService.delete(req.params.id);
+      return this.ok();
+    } catch (err) {
+      return this.badRequest(err);
+    }
   }
 }

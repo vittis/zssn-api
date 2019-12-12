@@ -44,7 +44,7 @@ const survivorCreateSchema = Joi.object({
 });
 
 export default {
-  path: '/survivors',
+  path: '/survivors/',
   method: 'post',
   schema: survivorCreateSchema,
 };

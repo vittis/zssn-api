@@ -8,16 +8,4 @@ export class ItemService {
       .populate('item')
       .populate('owner');
   }
-
-  public async create(blueprint: Item): Promise<Item> {
-    return await ItemSchema.create(blueprint);
-  }
-
-  public async findById(id: number) {
-    //
-  }
-
-  public async delete(id: number) {
-    //
-  }
 }

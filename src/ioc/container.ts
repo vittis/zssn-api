@@ -11,17 +11,21 @@ export const TYPES = {
   SchemaValidator: Symbol.for('SchemaValidator'),
 };
 
-export class ContainerConfigLoader {
+export class IoCContainer {
+  private static container: Container;
+
+  public static inject(symbol: symbol) {
+    return this.container.get(symbol);
+  }
+
   public static Load(): Container {
-    const container = new Container();
-    container.bind<SchemaValidator>(TYPES.SchemaValidator).to(SchemaValidator);
+    this.container = new Container();
 
-    container.bind<SurvivorService>(TYPES.SurvivorService).to(SurvivorService);
-    container.bind<ItemService>(TYPES.ItemService).to(ItemService);
-    container
-      .bind<BlueprintService>(TYPES.BlueprintService)
-      .to(BlueprintService);
+    this.container.bind<SchemaValidator>(TYPES.SchemaValidator).to(SchemaValidator);
+    this.container.bind<SurvivorService>(TYPES.SurvivorService).to(SurvivorService);
+    this.container.bind<ItemService>(TYPES.ItemService).to(ItemService);
+    this.container.bind<BlueprintService>(TYPES.BlueprintService).to(BlueprintService);
 
-    return container;
+    return this.container;
   }
 }

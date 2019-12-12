@@ -14,8 +14,7 @@ export class SchemaValidator extends BaseMiddleware {
       allowUnknown: true, // allow unknown keys that will be ignored
       stripUnknown: true, // remove unknown keys from the validated data
     };
-
-    const route = req.route.path.slice(0, -1);
+    const route = req.route.path;
     const method = req.method.toLowerCase();
 
     const { schema } = _.find(Schemas, { path: route, method: method }) || {};

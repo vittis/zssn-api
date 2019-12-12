@@ -6,7 +6,7 @@ export interface Blueprint extends Document {
 }
 
 const BlueprintSchema: Schema = new Schema({
-  name: { type: Schema.Types.String, required: true },
+  name: { type: Schema.Types.String, required: true, unique: true },
   points: { type: Schema.Types.Number, required: true },
 });
 
