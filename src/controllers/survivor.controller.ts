@@ -42,10 +42,7 @@ export class SurvivorController extends BaseHttpController {
   }
 
   @httpPost('/', TYPES.SchemaValidator)
-  public async store(
-    req: Request,
-    res: Response,
-  ): Promise<Survivor | BadRequest> {
+  public async store(req: Request): Promise<Survivor | BadRequest> {
     try {
       const blueprints = await this.blueprintService.findAll();
       return await this.survivorService.create(req.body, blueprints);

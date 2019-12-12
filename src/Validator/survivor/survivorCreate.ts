@@ -23,8 +23,24 @@ const survivorCreateSchema = Joi.object({
     .integer()
     .positive()
     .required(),
-  lon: Joi.number().required(),
-  lat: Joi.number().required(),
+  lon: Joi.number()
+    .greater(-181)
+    .less(181)
+    .required(),
+  lat: Joi.number()
+    .greater(-91)
+    .less(91)
+    .required(),
+  items: Joi.array()
+    .items(
+      Joi.object({
+        id: Joi.string().required(),
+        quantity: Joi.number()
+          .integer()
+          .positive(),
+      }),
+    )
+    .default([]),
 });
 
 export default {

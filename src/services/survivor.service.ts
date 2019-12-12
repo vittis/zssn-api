@@ -1,4 +1,5 @@
 import { injectable } from 'inversify';
+import _ from 'lodash';
 import SurvivorSchema, { Survivor } from '../models/survivor.model';
 import ItemSchema from '../models/item.model';
 import { Blueprint } from '../models/blueprint.model';
@@ -11,11 +12,11 @@ export class SurvivorService {
   }
 
   public async create(
-    survivorData: SurvivorCreateDTO,
-    items: Blueprint[],
+    survivorDto: SurvivorCreateDTO,
+    blueprints: Blueprint[],
   ): Promise<Survivor> {
-    const { name, gender, age, lon, lat } = survivorData;
-
+    const { name, gender, age, lon, lat, items } = survivorDto;
+    console.log(items);
     const survivor = new SurvivorSchema({
       name,
       gender,
@@ -26,7 +27,9 @@ export class SurvivorService {
       },
     });
 
-    const itemId = items[0].id;
+    //_.find(blueprints, {_id: })
+
+    const itemId = blueprints[0].id;
 
     const item = new ItemSchema({
       quantity: 1,
@@ -34,9 +37,10 @@ export class SurvivorService {
       owner: survivor.id,
     });
 
+    const survivorModel = await survivor.save();
     await item.save();
 
-    return await survivor.save();
+    return survivorModel;
   }
 
   public async findById(id: number) {

@@ -1,9 +1,9 @@
 import { injectable } from 'inversify';
 import { BaseMiddleware } from 'inversify-express-utils';
 import { Request, Response, NextFunction } from 'express';
-import Schemas from '../Validator';
 import _ from 'lodash';
 import Joi from 'joi';
+import Schemas from '../Validator';
 
 @injectable()
 export class SchemaValidator extends BaseMiddleware {
