@@ -2,14 +2,18 @@ import { injectable } from 'inversify';
 import { IoCContainer, TYPES } from '../ioc/container';
 import SurvivorSchema, { Survivor } from '../models/survivor.model';
 import { BlueprintService } from './blueprint.service';
-import ItemSchema from '../models/item.model';
+import { ItemService } from './item.service';
+import ItemSchema, { Item } from '../models/item.model';
+import { Blueprint } from '../models/blueprint.model';
 import { SurvivorCreateDTO } from '../Validator/survivor/survivorCreate';
 import { SurvivorUpdateDTO } from '../Validator/survivor/survivorUpdate';
 import { ReportInfectionDTO } from '../Validator/survivor/reportInfection';
+import { TradeDTO } from '../Validator/survivor/survivorTrade';
 
 @injectable()
 export class SurvivorService {
   blueprintService = IoCContainer.inject(TYPES.BlueprintService) as BlueprintService;
+  itemsService = IoCContainer.inject(TYPES.ItemService) as ItemService;
 
   public async findAll(): Promise<Survivor[]> {
     return await SurvivorSchema.find();
@@ -18,13 +22,11 @@ export class SurvivorService {
   public async create(survivorDto: SurvivorCreateDTO): Promise<Survivor> {
     const { name, gender, age, coordinates, items } = survivorDto;
 
+    // check if name exists
     const survivor = await SurvivorSchema.findOne({ name });
-
     if (survivor) {
       throw `A survivor named ${name} already exists`;
     }
-
-    const blueprints = await this.blueprintService.findAll();
 
     const newSurvivor = new SurvivorSchema({
       name,
@@ -35,6 +37,8 @@ export class SurvivorService {
         coordinates,
       },
     });
+
+    const blueprints = await this.blueprintService.findAll();
 
     const itemsToAdd = items.map(item => {
       const blueprint = blueprints.find(o => o.id === item.id);
@@ -48,11 +52,11 @@ export class SurvivorService {
       });
     });
 
-    const survivorModel = await newSurvivor.save();
+    const createdSurvivor = await newSurvivor.save();
 
     await ItemSchema.create(itemsToAdd);
 
-    return survivorModel;
+    return createdSurvivor;
   }
 
   public async findById(id: string): Promise<Survivor> {
@@ -60,16 +64,18 @@ export class SurvivorService {
   }
 
   public async update(id: string, survivorDto: SurvivorUpdateDTO): Promise<Survivor> {
+    // separate coordinates from other data
     const { coordinates, ...rest } = survivorDto;
 
+    // check if name already exists
     if (rest.name) {
       const survivor = await SurvivorSchema.findOne({ name: rest.name });
-
       if (survivor) {
         throw `A survivor named ${rest.name} already exists`;
       }
     }
 
+    // find and update
     const updatedSurvivor = await SurvivorSchema.findOneAndUpdate(
       { _id: id },
       {
@@ -95,6 +101,55 @@ export class SurvivorService {
 
   public async delete(id: string): Promise<Survivor> {
     return await SurvivorSchema.findByIdAndDelete(id);
+  }
+
+  public async findAllItems(id: string): Promise<Item[]> {
+    const survivor = await this.findById(id);
+    if (!survivor) {
+      throw `Survivor id "${id}" not found`;
+    }
+
+    return await this.itemsService.findAllFromSurvivor(id);
+  }
+
+  public async trade(id: string, tradeDTO: TradeDTO): Promise<Survivor> {
+    const { recipientId, givenItems, offeredItems } = tradeDTO;
+
+    // check if participants exist
+    const sender = await this.findById(id);
+    if (!sender) {
+      throw `Sender survivor id "${id}" not found`;
+    }
+    const recipient = await this.findById(recipientId);
+    if (!recipient) {
+      throw `Recipient survivor id "${id}" not found`;
+    }
+
+    // check if participants have the items
+    const senderHasItems = await this.hasItems(id, givenItems);
+    if (!senderHasItems) {
+      throw `Sender doesn't have the items`;
+    }
+    const recipientHasItems = await this.hasItems(recipientId, offeredItems);
+    if (!recipientHasItems) {
+      throw `Recipient doesn't have the items`;
+    }
+
+    // check if both sides have equal points
+    const blueprints = await this.blueprintService.findAll();
+    try {
+      const senderTotalPoints = this.calculateTotalPoints(givenItems, blueprints);
+      const recipientTotalPoints = this.calculateTotalPoints(offeredItems, blueprints);
+      console.log(senderTotalPoints);
+      console.log(recipientTotalPoints);
+      if (senderTotalPoints !== recipientTotalPoints) {
+        throw 'Items points do not match';
+      }
+    } catch (err) {
+      throw `Could not complete trade ${err}`;
+    }
+
+    return await SurvivorSchema.findById(id);
   }
 
   public async reportInfection(
@@ -141,5 +196,26 @@ export class SurvivorService {
         new: true,
       },
     );
+  }
+
+  public async hasItems(id: string, items: Partial<Item>[]): Promise<boolean> {
+    const survivorItems = await this.itemsService.findAllFromSurvivor(id);
+
+    const mutualItems = items.filter(item =>
+      survivorItems.some(
+        senderItem =>
+          senderItem.item.id === item.id && senderItem.quantity >= item.quantity,
+      ),
+    );
+
+    return mutualItems.length === items.length;
+  }
+
+  public calculateTotalPoints(items: Partial<Item>[], blueprints: Blueprint[]): number {
+    const totalPoints = items.reduce(
+      (acc, item) => acc + item.quantity * blueprints.find(b => b.id === item.id).points,
+      0,
+    );
+    return totalPoints;
   }
 }

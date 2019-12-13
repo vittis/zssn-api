@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { Request } from 'express';
 import { inject } from 'inversify';
 import {
   BaseHttpController,
@@ -10,12 +10,12 @@ import {
 } from 'inversify-express-utils';
 import { SurvivorService } from '../services/survivor.service';
 import {
-  JsonResult,
   BadRequestErrorMessageResult as BadRequest,
   OkResult,
 } from 'inversify-express-utils/dts/results';
 import { TYPES } from '../ioc/container';
 import { Survivor } from '../models/survivor.model';
+import { Item } from '../models/item.model';
 
 @controller('/survivors')
 export class SurvivorController extends BaseHttpController {
@@ -74,6 +74,24 @@ export class SurvivorController extends BaseHttpController {
   public async reportInfection(req: Request): Promise<Survivor | BadRequest> {
     try {
       return await this.survivorService.reportInfection(req.params.id, req.body);
+    } catch (err) {
+      return this.badRequest(err);
+    }
+  }
+
+  @httpPost('/:id/trade', TYPES.SchemaValidator)
+  public async trade(req: Request): Promise<Survivor | BadRequest> {
+    try {
+      return await this.survivorService.trade(req.params.id, req.body);
+    } catch (err) {
+      return this.badRequest(err);
+    }
+  }
+
+  @httpGet('/:id/items', TYPES.SchemaValidator)
+  public async getItems(req: Request): Promise<Item[] | BadRequest> {
+    try {
+      return await this.survivorService.findAllItems(req.params.id);
     } catch (err) {
       return this.badRequest(err);
     }
