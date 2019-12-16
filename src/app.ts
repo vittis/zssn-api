@@ -1,11 +1,12 @@
 import 'reflect-metadata';
+import Dotenv from 'dotenv';
 import { InversifyExpressServer } from 'inversify-express-utils';
 import bodyParser from 'body-parser';
 import { DbConnection } from './db/connection.db';
 import { IoCContainer } from './ioc/container';
 import './ioc/loader';
 
-const PORT = 3030;
+Dotenv.config();
 
 // load everything needed to the Container
 const container = IoCContainer.Load();
@@ -26,7 +27,7 @@ DbConnection.initConnection().then(() => {
 
   const serverInstance = server.build();
 
-  serverInstance.listen(PORT, () => {
-    console.log(`Server listening on port ${PORT}`);
+  serverInstance.listen(process.env.PORT || 3030, () => {
+    console.log(`Server listening on port ${process.env.PORT || 3030}`);
   });
 });

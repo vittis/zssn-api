@@ -12,6 +12,7 @@ import { SurvivorService } from '../services/survivor.service';
 import {
   BadRequestErrorMessageResult as BadRequest,
   OkResult,
+  NotFoundResult,
 } from 'inversify-express-utils/dts/results';
 import { TYPES } from '../ioc/container';
 import { Survivor } from '../models/survivor.model';
@@ -33,9 +34,13 @@ export class SurvivorController extends BaseHttpController {
   }
 
   @httpGet('/:id')
-  public async show(req: Request): Promise<Survivor | BadRequest> {
+  public async show(req: Request): Promise<Survivor | BadRequest | NotFoundResult> {
     try {
-      return await this.survivorService.findById(req.params.id);
+      const survivor = await this.survivorService.findById(req.params.id);
+      if (!survivor) {
+        return this.notFound();
+      }
+      return survivor;
     } catch (err) {
       return this.badRequest(err);
     }
@@ -80,7 +85,7 @@ export class SurvivorController extends BaseHttpController {
   }
 
   @httpPost('/:id/trade', TYPES.SchemaValidator)
-  public async trade(req: Request): Promise<Survivor | BadRequest> {
+  public async trade(req: Request): Promise<void | BadRequest> {
     try {
       return await this.survivorService.trade(req.params.id, req.body);
     } catch (err) {

@@ -11,6 +11,7 @@
   "author": "Vitor Bichara",
   "license": "ISC",
   "dependencies": {
+    "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "inversify": "^5.0.1",
     "inversify-express-utils": "^6.3.2",
@@ -22,6 +23,7 @@
     "rimraf": "^3.0.0"
   },
   "devDependencies": {
+    "@types/dotenv": "^8.2.0",
     "@types/express": "^4.17.2",
     "@types/joi": "^14.3.4",
     "@types/lodash": "^4.14.149",

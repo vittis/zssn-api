@@ -12,8 +12,9 @@ import { TradeDTO } from '../Validator/survivor/survivorTrade';
 
 @injectable()
 export class SurvivorService {
-  blueprintService = IoCContainer.inject(TYPES.BlueprintService) as BlueprintService;
-  itemsService = IoCContainer.inject(TYPES.ItemService) as ItemService;
+  // eslint-disable-next-line prettier/prettier
+  private blueprintService = IoCContainer.inject(TYPES.BlueprintService) as BlueprintService;
+  private itemsService = IoCContainer.inject(TYPES.ItemService) as ItemService;
 
   public async findAll(): Promise<Survivor[]> {
     return await SurvivorSchema.find();
@@ -112,7 +113,7 @@ export class SurvivorService {
     return await this.itemsService.findAllFromSurvivor(id);
   }
 
-  public async trade(id: string, tradeDTO: TradeDTO): Promise<Survivor> {
+  public async trade(id: string, tradeDTO: TradeDTO): Promise<void> {
     const { recipientId, givenItems, offeredItems } = tradeDTO;
 
     // check if participants exist
@@ -125,31 +126,77 @@ export class SurvivorService {
       throw `Recipient survivor id "${id}" not found`;
     }
 
+    // check if infected
+    if (sender.infected || recipient.infected) {
+      throw `Can't perform trade with infected survivors`;
+    }
+
     // check if participants have the items
-    const senderHasItems = await this.hasItems(id, givenItems);
+    const senderItems = await this.itemsService.findAllFromSurvivor(id);
+    const senderHasItems = await this.hasItems(id, senderItems, givenItems);
     if (!senderHasItems) {
       throw `Sender doesn't have the items`;
     }
-    const recipientHasItems = await this.hasItems(recipientId, offeredItems);
+    const recipientItems = await this.itemsService.findAllFromSurvivor(recipientId);
+    const recipientHasItems = await this.hasItems(
+      recipientId,
+      recipientItems,
+      offeredItems,
+    );
     if (!recipientHasItems) {
       throw `Recipient doesn't have the items`;
     }
 
-    // check if both sides have equal points
-    const blueprints = await this.blueprintService.findAll();
-    try {
-      const senderTotalPoints = this.calculateTotalPoints(givenItems, blueprints);
-      const recipientTotalPoints = this.calculateTotalPoints(offeredItems, blueprints);
-      console.log(senderTotalPoints);
-      console.log(recipientTotalPoints);
-      if (senderTotalPoints !== recipientTotalPoints) {
-        throw 'Items points do not match';
-      }
-    } catch (err) {
-      throw `Could not complete trade ${err}`;
+    const isTradeIsFair = await this.isTradeIsFair(givenItems, offeredItems);
+    if (!isTradeIsFair) {
+      throw 'Items points do not match';
     }
 
-    return await SurvivorSchema.findById(id);
+    this.confirmTrade(senderItems, givenItems, recipientItems, offeredItems);
+  }
+
+  public async isTradeIsFair(
+    givenItems: Partial<Item>[],
+    offeredItems: Partial<Item>[],
+  ): Promise<boolean> {
+    const blueprints = await this.blueprintService.findAll();
+    const senderTotalPoints = this.calculateTotalPoints(givenItems, blueprints);
+    const recipientTotalPoints = this.calculateTotalPoints(offeredItems, blueprints);
+    if (senderTotalPoints !== recipientTotalPoints) {
+      return false;
+    }
+    return true;
+  }
+
+  public async confirmTrade(
+    senderItems: Item[],
+    givenItems: Partial<Item>[],
+    recipientItems: Item[],
+    offeredItems: Partial<Item>[],
+  ): Promise<void> {
+    givenItems.forEach(async itemToGive => {
+      const item = senderItems.find(item => item.item.id === itemToGive.id);
+      if (item.quantity === itemToGive.quantity) {
+        await ItemSchema.findByIdAndDelete(item.id);
+      } else {
+        await ItemSchema.findOneAndUpdate(
+          { _id: item.id },
+          { quantity: item.quantity - itemToGive.quantity },
+        );
+      }
+    });
+
+    offeredItems.forEach(async itemToReceive => {
+      const item = recipientItems.find(item => item.item.id === itemToReceive.id);
+      if (item.quantity === itemToReceive.quantity) {
+        await ItemSchema.findByIdAndDelete(item.id);
+      } else {
+        await ItemSchema.findOneAndUpdate(
+          { _id: item.id },
+          { quantity: item.quantity - itemToReceive.quantity },
+        );
+      }
+    });
   }
 
   public async reportInfection(
@@ -198,9 +245,11 @@ export class SurvivorService {
     );
   }
 
-  public async hasItems(id: string, items: Partial<Item>[]): Promise<boolean> {
-    const survivorItems = await this.itemsService.findAllFromSurvivor(id);
-
+  public async hasItems(
+    id: string,
+    survivorItems: Item[],
+    items: Partial<Item>[],
+  ): Promise<boolean> {
     const mutualItems = items.filter(item =>
       survivorItems.some(
         senderItem =>
