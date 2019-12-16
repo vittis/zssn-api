@@ -4,7 +4,7 @@
     "esModuleInterop": true,
     "target": "es5",
     "lib": ["es6"],
-    "types": ["reflect-metadata"],
+    "types": ["reflect-metadata", "jest"],
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "noImplicitAny": true,
@@ -20,9 +20,10 @@
     }
   },
   "include": [
-    "src/**/*"
+    "src/**/*",
+    "jest.config.js"
   ],
   "exclude": [
-    "**/*.test.ts"
+    "src/__tests__/**/*"
   ]
 }
