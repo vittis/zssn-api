@@ -10,7 +10,6 @@ export interface SurvivorCreateDTO {
 
 const survivorCreateSchema = Joi.object({
   name: Joi.string()
-    .alphanum()
     .min(3)
     .max(100)
     .required(),

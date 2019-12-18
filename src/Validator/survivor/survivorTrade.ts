@@ -7,9 +7,7 @@ export interface TradeDTO {
 }
 
 const TradeSchema = Joi.object({
-  recipientId: Joi.string()
-    .alphanum()
-    .required(),
+  recipientId: Joi.string().required(),
   offeredItems: Joi.array()
     .items(
       Joi.object({

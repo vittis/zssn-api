@@ -9,7 +9,6 @@ export interface SurvivorUpdateDTO {
 
 const survivorUpdateSchema = Joi.object({
   name: Joi.string()
-    .alphanum()
     .min(3)
     .max(100),
   gender: Joi.string()

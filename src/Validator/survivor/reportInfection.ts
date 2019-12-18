@@ -5,9 +5,7 @@ export interface ReportInfectionDTO {
 }
 
 const reportInfectionSchema = Joi.object({
-  infectedId: Joi.string()
-    .alphanum()
-    .required(),
+  infectedId: Joi.string().required(),
 });
 
 export default {
