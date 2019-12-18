@@ -47,20 +47,54 @@ yarn lint # Lint project (eslint)
 yarn lint:fix # Try to fix all fixables errors
 ```
 ## Endpoints
-
    - SurvivorController
       - GET /survivors
       - GET /survivors/:id
       - POST /survivors
+         - Payload
+         ```json
+            {
+               name: string;
+               gender: string;
+               age: number;
+               coordinates: [number, number];
+               items: [{ id: string; quantity: number }];
+            }
       - PATCH /survivors/:id
+         - Payload
+         ```json
+            {
+               name?: string;
+               gender?: string;
+               age?: number;
+               coordinates?: [number, number];
+            }
       - DELETE /survivors/:id
       - POST /survivors/:id/report-infection
+         - Payload
+         ```json
+            {
+               infectedId: string;
+            }
       - POST /survivors/:id/trade
+         - Payload
+         ```json
+            {
+               recipientId: string;
+               offeredItems: [{ id: string; quantity: number }];
+               givenItems: [{ id: string; quantity: number }];
+            }
       - GET /survivors/:id/items
   - BlueprintController
       - GET /blueprints
       - GET /blueprints/:id
       - POST /blueprints
+         - Payload
+         ```json
+            {
+               name: string;
+               points: string;
+            }
       - DELETE /blueprints/:id
    - ItemController
       - GET /items
