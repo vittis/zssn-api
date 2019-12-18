@@ -17,6 +17,25 @@ export class ReportController extends BaseHttpController {
     super();
   }
 
+  @httpGet('/')
+  public async index(): Promise<JsonResult | BadRequest> {
+    try {
+      const infectedPercentage = await this.reportService.infectedPercentage();
+      const healthyPercentage = await this.reportService.healthyPercentage();
+      const pointsLost = await this.reportService.pointsLost();
+      const averageResources = await this.reportService.averageResources();
+
+      return this.json({
+        infectedPercentage,
+        healthyPercentage,
+        pointsLost,
+        averageResources,
+      });
+    } catch (err) {
+      return this.badRequest(err);
+    }
+  }
+
   @httpGet('/infected')
   public async infected(): Promise<JsonResult | BadRequest> {
     try {

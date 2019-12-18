@@ -51,7 +51,6 @@ export class ReportService {
   public async pointsLost(): Promise<any> {
     const allSurvivors = await this.survivorService.findAll();
     const infectedSurvivors = allSurvivors.filter(survivor => survivor.infected);
-    const allItems = await this.itemsService.findAll();
     const blueprints = await this.blueprintService.findAll();
 
     const lostPointsPerSurvivor = await Promise.all(

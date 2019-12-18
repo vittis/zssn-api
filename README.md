@@ -65,6 +65,7 @@ yarn lint:fix # Try to fix all fixables errors
    - ItemController
       - GET /items
    - ReportController
+      - route: GET /reports
       - route: GET /reports/infected
       - route: GET /reports/healthy
       - route: GET /reports/average-resources
