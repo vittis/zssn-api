@@ -152,7 +152,14 @@ export class SurvivorService {
       throw 'Items points do not match';
     }
 
-    this.confirmTrade(senderItems, givenItems, recipientItems, offeredItems);
+    this.confirmTrade(
+      senderItems,
+      givenItems,
+      recipientItems,
+      offeredItems,
+      id,
+      recipientId,
+    );
   }
 
   public async isTradeIsFair(
@@ -173,7 +180,10 @@ export class SurvivorService {
     givenItems: Partial<Item>[],
     recipientItems: Item[],
     offeredItems: Partial<Item>[],
+    senderId: string,
+    recipientId: string,
   ): Promise<void> {
+    /* Remove items from inventory */
     givenItems.forEach(async itemToGive => {
       const item = senderItems.find(item => item.item.id === itemToGive.id);
       if (item.quantity === itemToGive.quantity) {
@@ -194,6 +204,43 @@ export class SurvivorService {
         await ItemSchema.findOneAndUpdate(
           { _id: item.id },
           { quantity: item.quantity - itemToReceive.quantity },
+        );
+      }
+    });
+
+    /* Add items to inventory */
+    const updatedSenderItems = await this.itemsService.findAllFromSurvivor(senderId);
+    const updatedRecipientItems = await this.itemsService.findAllFromSurvivor(
+      recipientId,
+    );
+    givenItems.forEach(async itemToGive => {
+      const item = updatedRecipientItems.find(item => item.item.id === itemToGive.id);
+      if (!item) {
+        await ItemSchema.create({
+          quantity: itemToGive.quantity,
+          item: itemToGive.id,
+          owner: recipientId,
+        });
+      } else {
+        await ItemSchema.findOneAndUpdate(
+          { _id: item.id },
+          { quantity: item.quantity + itemToGive.quantity },
+        );
+      }
+    });
+
+    offeredItems.forEach(async itemToReceive => {
+      const item = updatedSenderItems.find(item => item.item.id === itemToReceive.id);
+      if (!item) {
+        await ItemSchema.create({
+          quantity: itemToReceive.quantity,
+          item: itemToReceive.id,
+          owner: senderId,
+        });
+      } else {
+        await ItemSchema.findOneAndUpdate(
+          { _id: item.id },
+          { quantity: item.quantity + itemToReceive.quantity },
         );
       }
     });
