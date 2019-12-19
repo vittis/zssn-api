@@ -24,12 +24,14 @@ export class ReportController extends BaseHttpController {
       const healthyPercentage = await this.reportService.healthyPercentage();
       const pointsLost = await this.reportService.pointsLost();
       const averageResources = await this.reportService.averageResources();
+      const blueprintsFound = await this.reportService.blueprintsFound();
 
       return this.json({
         infectedPercentage,
         healthyPercentage,
         pointsLost,
         averageResources,
+        blueprintsFound,
       });
     } catch (err) {
       return this.badRequest(err);

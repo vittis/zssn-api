@@ -67,4 +67,10 @@ export class ReportService {
 
     return lostPoints;
   }
+
+  public async blueprintsFound(): Promise<number> {
+    const allBlueprints = await this.blueprintService.findAll();
+
+    return allBlueprints.length;
+  }
 }
